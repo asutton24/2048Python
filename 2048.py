@@ -1,5 +1,6 @@
 import random
-
+import os
+import keyboard
 def movesLeft(b):
     for i in range(4):
         for j in range(4):
@@ -114,6 +115,11 @@ def display(b, s, h):
     print(disp)
 
 def main():
+    if os.name == 'nt':
+        clear = 'cls'
+    else:
+        clear = 'clear'
+    os.system(clear)
     print("2048: Use WASD to move the board")
     high = 0
     running = True
@@ -129,10 +135,20 @@ def main():
         win = False
         first = True
         playable = True
+        lastFrame = False
+        move = ''
         while playing:
             if playable:
                 copyBoard = copy(board)
-                move = input().lower()
+                while  keyboard.is_pressed('w') or keyboard.is_pressed('a') or keyboard.is_pressed('s') or keyboard.is_pressed('d'):
+                    a = 1
+                while True:
+                    if keyboard.is_pressed('w') or keyboard.is_pressed('a') or keyboard.is_pressed('s') or keyboard.is_pressed('d'):
+                        if not lastFrame:
+                            move = keyboard.read_key()
+                            lastFrame = True
+                            break
+                    lastFrame = False
                 board = collapse(move, board)
                 temp1 = merge(move, board)
                 board = temp1[0]
@@ -141,7 +157,6 @@ def main():
                     high = score
                 board = collapse(move, board)
             zeros = False
-            playable = movesLeft(board)
             for i in range(4):
                 for j in range(4):
                     if board[i][j] == 0:
@@ -150,23 +165,30 @@ def main():
                         win = True
             if (copyBoard != board) and zeros:
                 board = randomPiece(board)
+            playable = movesLeft(board)
             if win and first:
                 inp = 'a'
+                os.system(clear)
                 display(board, score, high)
+                print('You Win! Continue? (y/n)\n')
                 while inp != 'y' and inp != 'n':
-                    inp = input('You Win! Continue? (y/n)\n')
+                    inp = keyboard.read_key()
                     if inp == 'n':
                         playing = False
                     elif inp == 'y':
                         first = False
             if not playable:
                 playing = False
+            os.system(clear)
             display(board, score, high)
         inp = 'a'
+        print('Game Over! Play again? (y/n)\n')
         while inp != 'y' and inp != 'n':
-            inp = input('Game Over! Play again? (y/n)\n')
+            inp = keyboard.read_key()
             if inp == 'n':
                 running = False
+            if inp == 'y':
+                os.system(clear)
 
 
 main()
